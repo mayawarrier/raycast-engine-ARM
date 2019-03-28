@@ -1,15 +1,11 @@
 #include <math.h>
 #include <stdbool.h>
 
+#include "raycast.h"
+#include "address_map_arm.h"
+
 volatile int * FRAME_BUFFER_CTRL_PTR; // frame buffer controller
 volatile int FRAME_BUFFER_ADDR; // the address of the frame buffer, this should be the back buffer for complex animations
-
-#define SCREEN_SIZE_X 320
-#define SCREEN_SIZE_Y 240
-#define NUM_RECTANGLES 8
-#define NUM_COLORS 7
-#define RECT_SIZE_X 12
-#define RECT_SIZE_Y 8
 
 void clear_screen();
 void wait_for_vsync();
@@ -22,7 +18,7 @@ int main(void)
 {
 	// ------------------- clear the front frame buffer -----------------
 
-	FRAME_BUFFER_CTRL_PTR = (int *)0xFF203020;
+	FRAME_BUFFER_CTRL_PTR = (int *)PIXEL_BUF_CTRL_BASE;
 	/* Read location of the front frame buffer from the pixel buffer controller */
 	FRAME_BUFFER_ADDR = *FRAME_BUFFER_CTRL_PTR;
 	// clears the front frame buffer
@@ -31,106 +27,16 @@ int main(void)
 	// ------------------ initialize the back frame buffer -------------
 
 	// initializes the back buffer to the start of SDRAM memory 
-	*(FRAME_BUFFER_CTRL_PTR + 1) = 0xC0000000;
+	*(FRAME_BUFFER_CTRL_PTR + 1) = SDRAM_BASE;
 
 	// we draw to and clear from the back buffer now!
 	FRAME_BUFFER_ADDR = *(FRAME_BUFFER_CTRL_PTR + 1); 
 
-	/* ------- Animate 8 bouncing rectangles on the screen, connected by lines ---- */
-
-	// -------------- generate random initial velocities, locations, and colors --------
-
-	short int RECT_COLOR_PALETTE[NUM_COLORS];
-
-	int RECT_X_POS[NUM_RECTANGLES];
-	int RECT_Y_POS[NUM_RECTANGLES];
-	int RECT_X_VEL[NUM_RECTANGLES];
-	int RECT_Y_VEL[NUM_RECTANGLES];
-	short int RECT_COLORS[NUM_RECTANGLES];
-
-	// fill in all possible rectangle colors
-	RECT_COLOR_PALETTE[0] = 0xF800; // red
-	RECT_COLOR_PALETTE[1] = 0x07E0; // green
-	RECT_COLOR_PALETTE[2] = 0x001F; // blue
-	RECT_COLOR_PALETTE[3] = 0xFFE0; // yellow
-	RECT_COLOR_PALETTE[4] = 0xF81F; // magenta
-	RECT_COLOR_PALETTE[5] = 0x07FF; // cyan
-	RECT_COLOR_PALETTE[6] = 0xFCA0; // orange
-
-	int i;
-	for (i = 0; i < NUM_RECTANGLES; i++) {
-		RECT_X_POS[i] = rand() % (SCREEN_SIZE_X - RECT_SIZE_X);
-		RECT_Y_POS[i] = rand() % (SCREEN_SIZE_Y - RECT_SIZE_Y);
-		RECT_X_VEL[i] = rand() % 5 - 2;
-		RECT_Y_VEL[i] = rand() % 5 - 2;
-		RECT_COLORS[i] = RECT_COLOR_PALETTE[rand() % NUM_COLORS];
-	}
-
-	// do animation
+	// draw frames
 	while (true) {
 
-		// clear previous drawings
-		clear_screen();
-
-		// update positions based on velocities
-		int i;
-		for (i = 0; i < NUM_RECTANGLES; i++) {
-			RECT_X_POS[i] += RECT_X_VEL[i];
-			RECT_Y_POS[i] += RECT_Y_VEL[i];
-		}
-
-		// bounds checking, to bounce rectangles off the screeen edges
-		for (i = 0; i < NUM_RECTANGLES; i++) {
-			if (RECT_X_POS[i] < 0) {
-				RECT_X_POS[i] = 0;
-				RECT_X_VEL[i] = -RECT_X_VEL[i];
-			}
-			if (RECT_X_POS[i] + RECT_SIZE_X > SCREEN_SIZE_X) {
-				RECT_X_POS[i] = SCREEN_SIZE_X - RECT_SIZE_X;
-				RECT_X_VEL[i] = -RECT_X_VEL[i];
-			}
-			if (RECT_Y_POS[i] < 0) {
-				RECT_Y_POS[i] = 0;
-				RECT_Y_VEL[i] = -RECT_Y_VEL[i];
-			}
-			if (RECT_Y_POS[i] + RECT_SIZE_Y > SCREEN_SIZE_Y) {
-				RECT_Y_POS[i] = SCREEN_SIZE_Y - RECT_SIZE_Y;
-				RECT_Y_VEL[i] = -RECT_Y_VEL[i];
-			}
-		}
-
-		// --------------------------- draw rectangles and lines -------------------------
-
-		// pre-compute for speed
-		int HALF_RECT_SIZE_X = RECT_SIZE_X / 2;
-		int HALF_RECT_SIZE_Y = RECT_SIZE_Y / 2;
-
-		// updated as we draw all the lines
-		int line_start_x, line_start_y, line_end_x, line_end_y;
-
-		// redraw rectangles and lines
-		for (i = 0; i < NUM_RECTANGLES; i++) {
-
-			draw_rectangle(RECT_X_POS[i], RECT_Y_POS[i], RECT_SIZE_X, RECT_SIZE_Y, RECT_COLORS[i]);
-
-			// draw line from this rectangle center to the next rectangle center
-			line_start_x = RECT_X_POS[i] + HALF_RECT_SIZE_X;
-			line_start_y = RECT_Y_POS[i] + HALF_RECT_SIZE_Y;
-
-			if (i < NUM_RECTANGLES - 1) {
-				// not the last rectangle, connect this rectangle to the next rectangle
-				line_end_x = RECT_X_POS[i + 1] + HALF_RECT_SIZE_X;
-				line_end_y = RECT_Y_POS[i + 1] + HALF_RECT_SIZE_Y;
-				draw_line(line_start_x, line_start_y, line_end_x, line_end_y, 0xFFFF);
-			}
-			else {
-				// the last rectangle must connect to the first rectangle
-				line_end_x = RECT_X_POS[0] + HALF_RECT_SIZE_X;
-				line_end_y = RECT_Y_POS[0] + HALF_RECT_SIZE_Y;
-				draw_line(line_start_x, line_start_y, line_end_x, line_end_y, 0xFFFF);
-			}
-		}
-
+		// draw frame here!
+		
 		// switch the front and back buffers
 		wait_for_vsync();
 		// update the frame buffer address
