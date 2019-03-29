@@ -1,4 +1,3 @@
-#include <math.h>
 #include <stdbool.h>
 
 #include "raycast.h"
@@ -54,7 +53,7 @@ int main(void)
 
 	// draw frames
 	while (true) {
-
+		clear_screen();
 		// draw frame here!
 		draw_frame();
 		// switch the front and back buffers
@@ -170,11 +169,14 @@ void plot_pixel(int x, int y, short int pixel_color)
 
 void draw_frame()
 {
-     int i;
-     slice_info* s1;
-	for(i=0;i<SCREEN_SIZE_X;i++)
-		{
-		s1 = cast_ray(96,96,90,i);
-	  	draw_line(i, s1->location, i, s1->location+s1->size-1, 001F);
-		}
+	slice_info* this_slice;
+	
+	// iterate through all columns on the screen, drawing a slice at each
+	int i;
+	for (i = 0; i < SCREEN_SIZE_X; i++) {
+		this_slice = cast_ray(96, 96, 0, i);
+		if (this_slice->size != INT_MAX)
+			draw_line(i, this_slice->location, i, this_slice->location + this_slice->size - 1, 0x001F);
+		free(this_slice);
+	}
 }
