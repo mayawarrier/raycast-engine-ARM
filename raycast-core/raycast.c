@@ -2,8 +2,11 @@
 #include "raycast.h"
 #include "Map_Data.h"
 
-#define PROJECTION_FACTOR 2000
-#define HALF_FOV FOV / 2.0;
+// filled in by main
+volatile int MAP_DATA[MAP_SIZE_X][MAP_SIZE_Y];
+
+#define PROJECTION_FACTOR 4500
+#define HALF_FOV FOV / 2.0
 
 // emits a ray from first intersection with the grid, and traces it until it hits either a wall or goes out of bounds
 // if the ray goes out of bounds, return point(INT_MAX, INT_MAX)
@@ -32,7 +35,7 @@ slice_info* cast_ray(int playerX, int playerY, double player_angle, int screen_c
 	double screen_column_angle = screen_column * RAY_ANGLE_INC;
 	
 	// move to the left of the FOV then subtract the offset to compute angle at this screen column
-	ALPHA = player_angle + HALF_FOV - screen_column_angle;
+	ALPHA = player_angle - screen_column_angle + HALF_FOV;
 
 	// BETA is angle between the casted ray and the player angle (center of FOV)
 	BETA = screen_column_angle - HALF_FOV;
@@ -40,18 +43,18 @@ slice_info* cast_ray(int playerX, int playerY, double player_angle, int screen_c
 	// wrap around ALPHA to keep it within the bounds of 0 - 360
 	if (ALPHA < 0.0) ALPHA += 360.0;
 	else if (ALPHA > 360.0) ALPHA -= 360.0;
-
+	
 	point horizontal_intersection = find_closest_horizontal_wall_intersection(playerX, playerY);
 	point vertical_intersection = find_closest_vertical_wall_intersection(playerX, playerY);
 
-	double closest_distance = find_closest_distance_to_wall(playerX, playerY, &horizontal_intersection, &vertical_intersection);
-
+	double closest_distance = find_closest_distance_to_wall(playerX, &horizontal_intersection, &vertical_intersection);
+	
 	if (closest_distance == 0) {
 		// no wall intersections were found at this ray
 		return make_slice_info(INT_MAX, INT_MAX);
 	} else {
 		// reverse fishbowl the distance and apply the projection factor to find the slice size
-		int slice_size = PROJECTION_FACTOR / reverse_fishbowl(closest_distance);
+		int slice_size = PROJECTION_FACTOR / (reverse_fishbowl(closest_distance));
 		// limit slice size to the maximum value for this resolution, if it is bigger than the screen
 		if (slice_size > SCREEN_SIZE_Y) slice_size = SCREEN_SIZE_Y;
 		// return a slice info. location of slice is from the top of the screen
@@ -65,18 +68,18 @@ point find_closest_horizontal_wall_intersection(int playerX, int playerY) {
 	// inter_offset x and y are (x, y) offsets to get from the current intersection to the next intersection with the grid
 	// current_inter x and y are the (x, y) unit coords of the current intersection of the ray with the grid (i.e. at
 	// this moment in the ray travel)
-	int first_inter_x, first_inter_y, inter_offset_x, inter_offset_y, current_inter_x, current_inter_y;
+	int first_inter_x, first_inter_y, inter_offset_x, inter_offset_y;
 	
 	// --------------------------------- compute first intersection with the grid and offset -----------------------
 
 	if (ALPHA >= 0 && ALPHA < 180) {
 		// ray facing up
-		first_inter_y = (playerY >> 6) << 6 - 1; // subtract 1 to make A part of the grid block above the grid line
+		first_inter_y = ((playerY >> 6) << 6) - 1; // subtract 1 to make A part of the grid block above the grid line
 		// move the ray upwards by 64 unit coords when the ray is facing upwards
 		inter_offset_y = -64;
 	} else if (ALPHA >= 180 && ALPHA < 360) {
 		// ray facing down
-		first_inter_y = (playerY >> 6) << 6 + 64; // add 64 to make first_inter_y the y position of the next grid block
+		first_inter_y = ((playerY >> 6) << 6) + 64; // add 64 to make first_inter_y the y position of the next grid block
 		// move the ray downwards by 64 unit coords when the ray is facing downwards
 		inter_offset_y = 64;
 	}
@@ -97,13 +100,13 @@ point find_closest_horizontal_wall_intersection(int playerX, int playerY) {
 
 point find_closest_vertical_wall_intersection(int playerX, int playerY) {
 
-	int first_inter_x, first_inter_y, current_inter_x, current_inter_y, inter_offset_x, inter_offset_y;
+	int first_inter_x, first_inter_y, inter_offset_x, inter_offset_y;
 
 	if (ALPHA >= 90 && ALPHA < 270) {
-		first_inter_x = (playerX >> 6) << 6 - 1;
+		first_inter_x = ((playerX >> 6) << 6) - 1;
 		inter_offset_x = -64;
 	} else if ((ALPHA >= 270 && ALPHA < 360) || (ALPHA >= 0 && ALPHA < 90)) {
-		first_inter_x = (playerX >> 6) << 6 + 64;
+		first_inter_x = ((playerX >> 6) << 6) + 64;
 		inter_offset_x = 64;
 	}
 	
@@ -138,7 +141,7 @@ point emit_and_trace_ray(int first_inter_x, int first_inter_y, int inter_offset_
 		// -------------------- check whether or not to break out of ray casting --------------
 
 		// check if a wall exists at this grid location
-		if (MAP_DATA[grid_point.x][grid_point.y] == 1) {
+		if (MAP_DATA[current_inter_grid_point.x][current_inter_grid_point.y] == 1) {
 			// we've reached a wall, these are our wall unit coordinates
 			// break to prevent moving ray further
 			break;

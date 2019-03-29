@@ -9,7 +9,7 @@
 #define SCREEN_SIZE_X 320
 #define SCREEN_SIZE_Y 240
 #define FOV 60.0
-#define RAY_ANGLE_INC (FOV/SCREEN_SIZE_X);
+#define RAY_ANGLE_INC (FOV/SCREEN_SIZE_X)
 
 #define sind(x) (sin((x) * M_PI / 180))
 #define cosd(x) (cos((x) * M_PI / 180))
