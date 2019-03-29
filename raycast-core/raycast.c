@@ -1,5 +1,6 @@
 
 #include "raycast.h"
+#include "Map_Data.h"
 
 #define PROJECTION_FACTOR 2000
 #define HALF_FOV FOV / 2.0;
