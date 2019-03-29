@@ -1,3 +1,10 @@
+# FPGA monitor program-generated files
+*.amp
+*.axf
+*.objdump
+*.srec
+*.txt
+
 # Visual studio settings
 .vs/
 
