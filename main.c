@@ -3,6 +3,7 @@
 
 #include "raycast.h"
 #include "address_map_arm.h"
+#include "Map_Data.h"
 
 volatile int * FRAME_BUFFER_CTRL_PTR; // frame buffer controller
 volatile int FRAME_BUFFER_ADDR; // the address of the frame buffer, this should be the back buffer for complex animations
@@ -25,28 +26,30 @@ int main(void)
 	clear_screen();
 
 	// ------------------ initialize the back frame buffer -------------
-	int i,j;
-	for(i=0;i<MAP_SIZE_X;i++)
-	   {
-	     for(j=0;j<MAP_SIZE_Y;j++)
-	         {
-	            MAP_DATA[i][j]=0;
-	         }
-	   }
-	MAP_DATA[0][0]=1;
-	MAP_DATA[1][0]=1;	
-	MAP_DATA[2][0]=1;
-	MAP_DATA[3][0]=1;
-	MAP_DATA[0][2]=1;
-	MAP_DATA[1][2]=1;
-	MAP_DATA[2][2]=1;
-	MAP_DATA[3][2]=1;
 
 	// initializes the back buffer to the start of SDRAM memory 
 	*(FRAME_BUFFER_CTRL_PTR + 1) = SDRAM_BASE;
 
 	// we draw to and clear from the back buffer now!
 	FRAME_BUFFER_ADDR = *(FRAME_BUFFER_CTRL_PTR + 1); 
+
+	// --------------------- initialize MAP_DATA -----------------------
+
+	int i, j;
+	for (i = 0; i < MAP_SIZE_X; i++) {
+		for (j = 0; j < MAP_SIZE_Y; j++) {
+			MAP_DATA[i][j] = 0;
+		}
+	}
+
+	MAP_DATA[0][0] = 1;
+	MAP_DATA[1][0] = 1;
+	MAP_DATA[2][0] = 1;
+	MAP_DATA[3][0] = 1;
+	MAP_DATA[0][2] = 1;
+	MAP_DATA[1][2] = 1;
+	MAP_DATA[2][2] = 1;
+	MAP_DATA[3][2] = 1;
 
 	// draw frames
 	while (true) {

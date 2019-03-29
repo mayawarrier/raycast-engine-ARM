@@ -1,5 +1,6 @@
 #ifndef MAP_DATA
 #define MAP_DATA
+
 #define MAP_SIZE_X 64
 #define MAP_SIZE_Y 64
 
