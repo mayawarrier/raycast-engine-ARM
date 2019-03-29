@@ -34,9 +34,9 @@ typedef struct slice_info {
 	// additional texture info can be inserted here later
 } slice_info;
 
-point find_closest_horizontal_wall_intersection(int playerX, int playerY, double ray_angle);
+point find_closest_horizontal_wall_intersection(int playerX, int playerY);
 
-point find_closest_vertical_wall_intersection(int playerX, int playerY, double ray_angle);
+point find_closest_vertical_wall_intersection(int playerX, int playerY);
 
 // if no wall exists at this ray, returns 0
 double find_closest_distance_to_wall(int playerX, point* horiz_intersection, point* vert_intersection);
