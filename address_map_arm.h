@@ -9,8 +9,8 @@
 #define A9_ONCHIP_END         0xFFFFFFFF
 #define SDRAM_BASE            0xC0000000
 #define SDRAM_END             0xC3FFFFFF
-#define FPGA_ONCHIP_BASE   0xC8000000
-#define FPGA_ONCHIP_END    0xC803FFFF
+#define FPGA_ONCHIP_BASE      0xC8000000
+#define FPGA_ONCHIP_END       0xC803FFFF
 #define FPGA_CHAR_BASE        0xC9000000
 #define FPGA_CHAR_END         0xC9001FFF
 
