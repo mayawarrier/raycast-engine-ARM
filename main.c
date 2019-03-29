@@ -14,6 +14,7 @@ void draw_rectangle(int x0, int y0, int x_size, int y_size, short int rect_color
 void draw_line(int x0, int y0, int x1, int y1, short int line_color);
 void plot_pixel(int x, int y, short int pixel_color);
 void swap(int *x, int *y);
+void draw_frame();
 
 int main(void) 
 {
@@ -55,7 +56,7 @@ int main(void)
 	while (true) {
 
 		// draw frame here!
-		
+		draw_frame();
 		// switch the front and back buffers
 		wait_for_vsync();
 		// update the frame buffer address
@@ -165,4 +166,15 @@ void swap(int *x, int *y) {
 void plot_pixel(int x, int y, short int pixel_color) 
 {
 	*(short int *)(FRAME_BUFFER_ADDR + (y << 10) + (x << 1)) = pixel_color;
+}
+
+void draw_frame()
+{
+     int i;
+     slice_info* s1;
+	for(i=0;i<SCREEN_SIZE_X;i++)
+		{
+		s1 = cast_ray(96,96,90,i);
+	  	draw_line(i, s1->location, i, s1->location+s1->size-1, 001F);
+		}
 }
