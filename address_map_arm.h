@@ -9,8 +9,8 @@
 #define A9_ONCHIP_END         0xFFFFFFFF
 #define SDRAM_BASE            0xC0000000
 #define SDRAM_END             0xC3FFFFFF
-#define FPGA_ONCHIP_BASE      0xC8000000
-#define FPGA_ONCHIP_END       0xC803FFFF
+#define FPGA_ONCHIP_BASE   0xC8000000
+#define FPGA_ONCHIP_END    0xC803FFFF
 #define FPGA_CHAR_BASE        0xC9000000
 #define FPGA_CHAR_END         0xC9001FFF
 
@@ -28,15 +28,22 @@
 #define JTAG_UART_2_BASE      0xFF201008
 #define IrDA_BASE             0xFF201020
 #define TIMER_BASE            0xFF202000
+#define TIMER_2_BASE          0xFF202020
 #define AV_CONFIG_BASE        0xFF203000
+#define RGB_RESAMPLER_BASE    0xFF203010
 #define PIXEL_BUF_CTRL_BASE   0xFF203020
 #define CHAR_BUF_CTRL_BASE    0xFF203030
 #define AUDIO_BASE            0xFF203040
 #define VIDEO_IN_BASE         0xFF203060
+#define EDGE_DETECT_CTRL_BASE 0xFF203070
 #define ADC_BASE              0xFF204000
 
 /* Cyclone V HPS devices */
 #define HPS_GPIO1_BASE        0xFF709000
+#define I2C0_BASE             0xFFC04000
+#define I2C1_BASE             0xFFC05000
+#define I2C2_BASE             0xFFC06000
+#define I2C3_BASE             0xFFC07000
 #define HPS_TIMER0_BASE       0xFFC08000
 #define HPS_TIMER1_BASE       0xFFC09000
 #define HPS_TIMER2_BASE       0xFFD00000
