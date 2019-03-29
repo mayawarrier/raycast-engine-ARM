@@ -55,7 +55,27 @@ point find_closest_horizontal_wall_intersection(int playerX, int playerY, double
 }
 
 point find_closest_vertical_wall_intersection(int playerX, int playerY, double ray_angle) {
+	int closest_x_intersection; 	//Bx
+	int closest_y_intersection; 	//By, found based off Bx value
+	int current_x_intersection, current_y_intersection;
+	double tan_alpha = tand(ALPHA);
+	int offset_x, offset_y;
+	if(ALPHA >= 90 && ALPHA < 270)
+		closest_x_intersection = floor(playerX/64)*64-1;
+	else if((ALPHA>=270 && ALPHA<360) || (ALPHA >=0 && ALPHA<90))
+		closest_x_intersection = floor(playerX/64)*64 +64;
 	
+	closest_y_intersection = playerY + (playerX - closest_x_intersection)/tan_alpha;
+	
+	if(ALPHA >=90 && ALPHA<270)
+		offset_x = -64;
+	if((ALPHA >= 270 && ALPHA <360) || (ALPHA>=0 && ALPHA<90))
+		offset_x  =  64;
+	
+	offset_y = -offset_x / tan_alpha;
+	
+	current_x_intersection = closest_x_intersection;
+	current_y_intersection = closest_y_intersection;		     	 	
 }
 
 // if no wall exists at this ray, returns 0
