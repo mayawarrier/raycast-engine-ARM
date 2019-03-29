@@ -36,9 +36,10 @@ slice_info* cast_ray(int playerX, int playerY, double player_angle, int screen_c
 	point horizontal_intersection = find_closest_horizontal_wall_intersection(playerX, playerY, ALPHA);
 	point vertical_intersection = find_closest_vertical_wall_intersection(playerX, playerY, ALPHA);
 
-	double closest_distance = find_closest_distance_to_wall(&horizontal_intersection, &vertical_intersection);
+	double closest_distance = find_closest_distance_to_wall(playerX, playerY, &horizontal_intersection, &vertical_intersection);
 
-	if (isnan(closest_distance)) {
+	if (closest_distance == 0) {
+		// no wall intersections were found at this ray
 		return make_slice_info(INT_MAX, INT_MAX);
 	} else {
 		int slice_size = PROJECTION_FACTOR / closest_distance;
@@ -57,8 +58,28 @@ point find_closest_vertical_wall_intersection(int playerX, int playerY, double r
 	
 }
 
-double find_closest_distance_to_wall(point* horiz_intersection, point* vert_intersection) {
-	
+// if no wall exists at this ray, returns 0
+double find_closest_distance_to_wall(int playerX, point* horiz_intersection, point* vert_intersection) {
+
+	// calculate distances to the horizontal and vertical intersections
+	double distance_horiz = (playerX - horiz_intersection->x) / cosd(ALPHA);
+	double distance_vert = (playerX - vert_intersection->x) / cosd(ALPHA);
+
+	// if the point is (INT_MAX, INT_MAX), no intersection was found
+
+	if (horiz_intersection->x == INT_MAX && vert_intersection->x != INT_MAX) {
+		// no horizontal intersection found but vert found, so closest distance is distance_vert
+		return distance_vert;
+	} else if (vert_intersection->x == INT_MAX && horiz_intersection->x != INT_MAX) {
+		// no vertical intersection found but horiz found, so closest distance is distance_horiz
+		return distance_horiz;
+	} else if (vert_intersection->x != INT_MAX && horiz_intersection->x != INT_MAX) {
+		// both intersections were found
+		return (distance_horiz > distance_vert) ? distance_vert : distance_horiz;
+	} else {
+		// no intersections were found
+		return 0;
+	}
 }
 
 double inline reverse_fishbowl(double polar_distance) {

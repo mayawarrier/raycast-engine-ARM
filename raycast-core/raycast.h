@@ -38,8 +38,8 @@ point find_closest_horizontal_wall_intersection(int playerX, int playerY, double
 
 point find_closest_vertical_wall_intersection(int playerX, int playerY, double ray_angle);
 
-// if no wall exists at this ray, returns NAN
-double find_closest_distance_to_wall(point* horiz_intersection, point* vert_intersection);
+// if no wall exists at this ray, returns 0
+double find_closest_distance_to_wall(int playerX, point* horiz_intersection, point* vert_intersection);
 
 slice_info* cast_ray(int playerX, int playerY, double player_angle, int screen_column);
 
