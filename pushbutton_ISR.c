@@ -30,7 +30,7 @@ void pushbutton_ISR(void)
 			player_y_pos = player_y_pos - increment_val;
 		else
 		   {
-                   	player_y_pos = player_y_pos - increment*cosd(player_angle);
+                   		player_y_pos = player_y_pos - increment*cosd(player_angle);
 			player_x_pos = player_x_pos - increment*sind(player_angle); 
 		   }
 	}
@@ -41,7 +41,7 @@ void pushbutton_ISR(void)
 			player_y_pos = player_y_pos + increment_val;
 		else
 		   {
-                   	player_y_pos = player_y_pos + increment_val*cosd(player_angle);
+                   		player_y_pos = player_y_pos + increment_val*cosd(player_angle);
 			player_x_pos = player_x_pos + increment_val*sind(player_angle); 
 		   }	
 	}
