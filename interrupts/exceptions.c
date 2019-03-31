@@ -1,14 +1,14 @@
-#include "address_map_arm.h"
+#include "../address_map_arm.h"
 #include "defines.h"
 #include "interrupt_ID.h"
+
 /* This file:
  * 1. defines exception vectors for the A9 processor
  * 2. provides code that sets the IRQ mode stack, and that dis/enables
  * interrupts
  * 3. provides code that initializes the generic interrupt controller
 */
-void HPS_timer_ISR(void);
-void interval_timer_ISR(void);
+
 void pushbutton_ISR(void);
 
 // Define the IRQ exception handler
@@ -18,12 +18,7 @@ void __attribute__((interrupt)) __cs3_isr_irq(void)
     int address = MPCORE_GIC_CPUIF + ICCIAR;
     int int_ID  = *((int *)address);
 
-    if (int_ID == HPS_TIMER0_IRQ) // check if interrupt is from the HPS timer
-        HPS_timer_ISR();
-    else if (int_ID ==
-             INTERVAL_TIMER_IRQ) // check if interrupt is from the Altera timer
-        interval_timer_ISR();
-    else if (int_ID == KEYS_IRQ) // check if interrupt is from the KEYs
+    if (int_ID == KEYS_IRQ) // check if interrupt is from the KEYs
         pushbutton_ISR();
     else
         while (1)
@@ -106,10 +101,6 @@ void enable_A9_interrupts(void)
 void config_GIC(void)
 {
     int address; // used to calculate register addresses
-
-    /* configure the HPS timer interrupt */
-    *((int *)0xFFFED8C4) = 0x01000000;
-    *((int *)0xFFFED118) = 0x00000080;
 
     /* configure the FPGA interval timer and KEYs interrupts */
     *((int *)0xFFFED848) = 0x00000101;
