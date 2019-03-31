@@ -1,11 +1,11 @@
 
 #include "raycast.h"
-#include "Map_Data.h"
+#include "../Map_Data.h"
 
 // filled in by main
 volatile int MAP_DATA[MAP_SIZE_X][MAP_SIZE_Y];
 
-#define PROJECTION_FACTOR 4500
+#define PROJECTION_FACTOR 5500
 #define HALF_FOV FOV / 2.0
 
 // emits a ray from first intersection with the grid, and traces it until it hits either a wall or goes out of bounds
@@ -181,15 +181,19 @@ double find_closest_distance_to_wall(int playerX, point* horiz_intersection, poi
 
 	if (horiz_intersection->x == INT_MAX && vert_intersection->x != INT_MAX) {
 		// no horizontal intersection found but vert found, so closest distance is distance_vert
+		//printf("distance vert chosen %lf", distance_vert);
 		return distance_vert;
 	} else if (vert_intersection->x == INT_MAX && horiz_intersection->x != INT_MAX) {
 		// no vertical intersection found but horiz found, so closest distance is distance_horiz
+		//printf("distance horiz chosen %lf", distance_horiz);
 		return distance_horiz;
 	} else if (vert_intersection->x != INT_MAX && horiz_intersection->x != INT_MAX) {
 		// both intersections were found
+		//printf("smaller of 2 chosen");
 		return (distance_horiz > distance_vert) ? distance_vert : distance_horiz;
 	} else {
 		// no intersections were found
+		//printf("bad");
 		return 0;
 	}
 }
