@@ -1,8 +1,14 @@
 #include <stdbool.h>
 
-#include "raycast.h"
+#include "raycast-core/raycast.h"
 #include "address_map_arm.h"
 #include "Map_Data.h"
+#include "interrupts/key_interrupt_setup.h"
+
+// set the default values, modified by key interrupts
+volatile double player_angle = 0;
+volatile int player_x_pos = 96;
+volatile int player_y_pos = 96;
 
 volatile int * FRAME_BUFFER_CTRL_PTR; // frame buffer controller
 volatile int FRAME_BUFFER_ADDR; // the address of the frame buffer, this should be the back buffer for complex animations
@@ -31,7 +37,7 @@ int main(void)
 	*(FRAME_BUFFER_CTRL_PTR + 1) = SDRAM_BASE;
 
 	// we draw to and clear from the back buffer now!
-	FRAME_BUFFER_ADDR = *(FRAME_BUFFER_CTRL_PTR + 1); 
+	FRAME_BUFFER_ADDR = *(FRAME_BUFFER_CTRL_PTR + 1);
 
 	// --------------------- initialize MAP_DATA -----------------------
 
@@ -51,9 +57,19 @@ int main(void)
 	MAP_DATA[2][2] = 1;
 	MAP_DATA[3][2] = 1;
 
+	// config key interrupts
+	config_key_interrupts();
+
 	// draw frames
 	while (true) {
 		clear_screen();
+
+		printf("%d", *(int*)KEY_BASE);
+
+		// draw ceiling and ground
+		draw_rectangle(0, 0, SCREEN_SIZE_X, SCREEN_SIZE_Y / 2, 0xFFFF);
+		draw_rectangle(0, SCREEN_SIZE_Y / 2, SCREEN_SIZE_X, SCREEN_SIZE_Y / 2, 0xD679);
+
 		// draw frame here!
 		draw_frame();
 		// switch the front and back buffers
@@ -170,11 +186,14 @@ void plot_pixel(int x, int y, short int pixel_color)
 void draw_frame()
 {
 	slice_info* this_slice;
+
+	int PLAYER_X = player_x_pos, PLAYER_Y = player_y_pos;
+	double PLAYER_ANGLE = player_angle;
 	
 	// iterate through all columns on the screen, drawing a slice at each
 	int i;
 	for (i = 0; i < SCREEN_SIZE_X; i++) {
-		this_slice = cast_ray(96, 96, 0, i);
+		this_slice = cast_ray(PLAYER_X, PLAYER_Y, PLAYER_ANGLE, i);
 		if (this_slice->size != INT_MAX)
 			draw_line(i, this_slice->location, i, this_slice->location + this_slice->size - 1, 0x001F);
 		free(this_slice);
