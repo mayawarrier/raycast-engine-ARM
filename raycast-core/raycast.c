@@ -47,7 +47,7 @@ slice_info* cast_ray(int playerX, int playerY, double player_angle, int screen_c
 	point horizontal_intersection = find_closest_horizontal_wall_intersection(playerX, playerY);
 	point vertical_intersection = find_closest_vertical_wall_intersection(playerX, playerY);
 
-	double closest_distance = find_closest_distance_to_wall(playerX, &horizontal_intersection, &vertical_intersection);
+	double closest_distance = find_closest_distance_to_wall(playerX, playerY, &horizontal_intersection, &vertical_intersection);
 	
 	if (closest_distance == 0) {
 		// no wall intersections were found at this ray
@@ -87,10 +87,18 @@ point find_closest_horizontal_wall_intersection(int playerX, int playerY) {
 	// pre-compute tan(alpha) for speed
 	double tan_alpha = tand(ALPHA);
 
-	// calculate first_inter_x using line formula
-	first_inter_x = playerX + (playerY - first_inter_y) / tan_alpha;
-	// calculate projection of inter_offset_y on x axis. -ve because Y axis is flipped
-	inter_offset_x = -inter_offset_y / tan_alpha;
+	if (tan_alpha == 0) {
+		// abort, there is no horizontal intersection!
+		return make_point(INT_MAX, INT_MAX);
+	} else if (ALPHA == 90 || ALPHA == 270) {
+		first_inter_x = playerX;
+		inter_offset_x = 0;
+	} else {
+		// calculate first_inter_x using line formula
+		first_inter_x = playerX + (playerY - first_inter_y) / tan_alpha;
+		// calculate projection of inter_offset_y on x axis. -ve because Y axis is flipped
+		inter_offset_x = -inter_offset_y / tan_alpha;
+	}
 
 	// ---------------------------- emit and trace the ray from first intersection outwards -----------------------
 
@@ -112,8 +120,8 @@ point find_closest_vertical_wall_intersection(int playerX, int playerY) {
 	
 	double tan_alpha = tand(ALPHA);
 
-	first_inter_y = playerY + (playerX - first_inter_x) / tan_alpha;		
-	inter_offset_y = -inter_offset_x / tan_alpha;
+	first_inter_y = playerY + (playerX - first_inter_x) * tan_alpha;		
+	inter_offset_y = -inter_offset_x * tan_alpha;
 	
 	// ---------------------------- emit and trace the ray from first intersection outwards -----------------------
 
@@ -171,29 +179,39 @@ point emit_and_trace_ray(int first_inter_x, int first_inter_y, int inter_offset_
 }
 
 // if no wall exists at this ray, returns 0
-double find_closest_distance_to_wall(int playerX, point* horiz_intersection, point* vert_intersection) {
+double find_closest_distance_to_wall(int playerX, int playerY, point* horiz_intersection, point* vert_intersection) {
 
-	// calculate distances to the horizontal and vertical intersections
-	double distance_horiz = (playerX - horiz_intersection->x) / cosd(ALPHA);
-	double distance_vert = (playerX - vert_intersection->x) / cosd(ALPHA);
+	double cos_alpha = cosd(ALPHA);
+
+	double distance_horiz, distance_vert;
+
+	// roughly a degree on either side of 90
+	if (abs(cos_alpha) < 0.0174524) {
+		return distance_horiz = playerY - vert_intersection->y;
+			//distance_vert = 0;
+			//else if (abs(ALPHA - 270.0) < 0.00001) {
+			//distance_horiz = horiz_intersection->y - playerY;
+			//distance_vert = 0;
+		//}
+	} else {
+		// calculate distances to the horizontal and vertical intersections
+		distance_horiz = (playerX - horiz_intersection->x) / cos_alpha;
+		distance_vert = (playerX - vert_intersection->x) / cos_alpha;
+	}
 
 	// if the point is (INT_MAX, INT_MAX), no intersection was found
 
 	if (horiz_intersection->x == INT_MAX && vert_intersection->x != INT_MAX) {
 		// no horizontal intersection found but vert found, so closest distance is distance_vert
-		//printf("distance vert chosen %lf", distance_vert);
 		return distance_vert;
 	} else if (vert_intersection->x == INT_MAX && horiz_intersection->x != INT_MAX) {
 		// no vertical intersection found but horiz found, so closest distance is distance_horiz
-		//printf("distance horiz chosen %lf", distance_horiz);
 		return distance_horiz;
 	} else if (vert_intersection->x != INT_MAX && horiz_intersection->x != INT_MAX) {
 		// both intersections were found
-		//printf("smaller of 2 chosen");
-		return (distance_horiz > distance_vert) ? distance_vert : distance_horiz;
+		return (distance_horiz > distance_vert) ? distance_horiz : distance_vert;
 	} else {
 		// no intersections were found
-		//printf("bad");
 		return 0;
 	}
 }

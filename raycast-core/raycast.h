@@ -11,6 +11,10 @@
 #define FOV 60.0
 #define RAY_ANGLE_INC (FOV/SCREEN_SIZE_X)
 
+#ifndef M_PI
+#    define M_PI 3.14159265358979323846
+#endif
+
 #define sind(x) (sin((x) * M_PI / 180))
 #define cosd(x) (cos((x) * M_PI / 180))
 #define tand(x) (tan((x) * M_PI / 180))
@@ -39,7 +43,7 @@ point find_closest_horizontal_wall_intersection(int playerX, int playerY);
 point find_closest_vertical_wall_intersection(int playerX, int playerY);
 
 // if no wall exists at this ray, returns 0
-double find_closest_distance_to_wall(int playerX, point* horiz_intersection, point* vert_intersection);
+double find_closest_distance_to_wall(int playerX, int playerY, point* horiz_intersection, point* vert_intersection);
 
 slice_info* cast_ray(int playerX, int playerY, double player_angle, int screen_column);
 
