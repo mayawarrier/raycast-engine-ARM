@@ -3,12 +3,16 @@
 #include "raycast-core/raycast.h"
 #include "address_map_arm.h"
 #include "Map_Data.h"
-#include "interrupts/key_interrupt_setup.h"
+//#include "interrupts/key_interrupt_setup.h"
 
 // set the default values, modified by key interrupts
 volatile double player_angle = 0;
 volatile int player_x_pos = 96;
 volatile int player_y_pos = 96;
+int increment = 8;
+
+// included in brick_image.s. Modify the path there to the texture (.bin) file as required
+extern short int BRICK_IMAGE[64][64];
 
 volatile int * FRAME_BUFFER_CTRL_PTR; // frame buffer controller
 volatile int FRAME_BUFFER_ADDR; // the address of the frame buffer, this should be the back buffer for complex animations
@@ -19,6 +23,8 @@ void draw_rectangle(int x0, int y0, int x_size, int y_size, short int rect_color
 void draw_line(int x0, int y0, int x1, int y1, short int line_color);
 void plot_pixel(int x, int y, short int pixel_color);
 void swap(int *x, int *y);
+
+void config_map();
 void draw_frame();
 
 int main(void) 
@@ -41,34 +47,42 @@ int main(void)
 
 	// --------------------- initialize MAP_DATA -----------------------
 
-	int i, j;
-	for (i = 0; i < MAP_SIZE_X; i++) {
-		for (j = 0; j < MAP_SIZE_Y; j++) {
-			MAP_DATA[i][j] = 0;
-		}
-	}
-
-	MAP_DATA[0][0] = 1;
-	MAP_DATA[1][0] = 1;
-	MAP_DATA[2][0] = 1;
-	MAP_DATA[3][0] = 1;
-	MAP_DATA[0][2] = 1;
-	MAP_DATA[1][2] = 1;
-	MAP_DATA[2][2] = 1;
-	MAP_DATA[3][2] = 1;
+	config_map();
 
 	// config key interrupts
-	config_key_interrupts();
+	//config_key_interrupts();
 
 	// draw frames
 	while (true) {
 		clear_screen();
 
-		printf("%d", *(int*)KEY_BASE);
+		// get the key value
+		int KEY_VALUE = *(int *)KEY_BASE;
+
+		// poll KEYs every frame to change player position and angle
+		if (KEY_VALUE == 1) {
+			player_angle -= 5 * RAY_ANGLE_INC;
+		} else if (KEY_VALUE == 8) {
+			player_angle += 5 * RAY_ANGLE_INC;
+		} else if (KEY_VALUE == 4) {
+			player_y_pos = player_y_pos - increment * sind(player_angle);
+			player_x_pos = player_x_pos + increment * cosd(player_angle);
+		} else if (KEY_VALUE == 2) {
+			player_y_pos = player_y_pos + increment * sind(player_angle);
+			player_x_pos = player_x_pos - increment * cosd(player_angle);
+		}
 
 		// draw ceiling and ground
 		draw_rectangle(0, 0, SCREEN_SIZE_X, SCREEN_SIZE_Y / 2, 0xFFFF);
-		draw_rectangle(0, SCREEN_SIZE_Y / 2, SCREEN_SIZE_X, SCREEN_SIZE_Y / 2, 0xD679);
+		draw_rectangle(0, SCREEN_SIZE_Y / 2, SCREEN_SIZE_X, SCREEN_SIZE_Y / 2, 0x9492);
+
+		// testing texture drawing
+		int i, j;
+		for (i = 0; i < 64; i++) {
+			for (j = 0; j < 64; j++) {
+				plot_pixel(i, j, BRICK_IMAGE[j][i]);
+			}
+		}
 
 		// draw frame here!
 		draw_frame();
@@ -181,6 +195,80 @@ void swap(int *x, int *y) {
 void plot_pixel(int x, int y, short int pixel_color) 
 {
 	*(short int *)(FRAME_BUFFER_ADDR + (y << 10) + (x << 1)) = pixel_color;
+}
+
+void config_map() {
+
+	// initializes the map with a small maze
+	// map.PNG is an image of this map
+
+	int i, j;
+	for (i = 0; i < MAP_SIZE_X; i++) {
+		for (j = 0; j < MAP_SIZE_Y; j++) {
+			MAP_DATA[i][j] = 0;
+		}
+	}
+
+	MAP_DATA[0][0] = 1;
+	MAP_DATA[1][0] = 1;
+	MAP_DATA[2][0] = 1;
+	MAP_DATA[3][0] = 1;
+	MAP_DATA[4][0] = 1;
+	MAP_DATA[5][0] = 1;
+	MAP_DATA[6][0] = 1;
+	MAP_DATA[7][0] = 1;
+	MAP_DATA[11][0] = 1;
+	MAP_DATA[14][0] = 1;
+
+	MAP_DATA[7][1] = 1;
+	MAP_DATA[11][1] = 1;
+	MAP_DATA[14][1] = 1;
+
+	MAP_DATA[0][2] = 1;
+	MAP_DATA[1][2] = 1;
+	MAP_DATA[2][2] = 1;
+	MAP_DATA[3][2] = 1;
+	MAP_DATA[4][2] = 1;
+	MAP_DATA[5][2] = 1;
+	MAP_DATA[7][2] = 1;
+	MAP_DATA[11][2] = 1;
+	MAP_DATA[14][2] = 1;
+
+	MAP_DATA[5][3] = 1;
+	MAP_DATA[7][3] = 1;
+	MAP_DATA[11][3] = 1;
+	MAP_DATA[14][3] = 1;
+
+	MAP_DATA[5][4] = 1;
+	MAP_DATA[7][4] = 1;
+	MAP_DATA[11][4] = 1;
+	MAP_DATA[14][4] = 1;
+
+	MAP_DATA[5][5] = 1;
+	MAP_DATA[7][5] = 1;
+	MAP_DATA[11][5] = 1;
+	MAP_DATA[14][5] = 1;
+
+	MAP_DATA[5][6] = 1;
+	MAP_DATA[7][6] = 1;
+	MAP_DATA[8][6] = 1;
+	MAP_DATA[11][6] = 1;
+	MAP_DATA[14][6] = 1;
+
+	MAP_DATA[0][9] = 1;
+	MAP_DATA[1][9] = 1;
+	MAP_DATA[2][9] = 1;
+	MAP_DATA[3][9] = 1;
+	MAP_DATA[4][9] = 1;
+	MAP_DATA[5][9] = 1;
+	MAP_DATA[6][9] = 1;
+	MAP_DATA[7][9] = 1;
+	MAP_DATA[8][9] = 1;
+	MAP_DATA[9][9] = 1;
+	MAP_DATA[10][9] = 1;
+	MAP_DATA[11][9] = 1;
+	MAP_DATA[12][9] = 1;
+	MAP_DATA[13][9] = 1;
 }
 
 void draw_frame()
