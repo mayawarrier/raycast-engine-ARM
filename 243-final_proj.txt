@@ -1,0 +1,12 @@
+geometric constraints:
+
+1)walls -> CUBES (64x64x64)
+2)floors-> RECTANGLES? I.E FLAT
+3) walls perpendicular to floors
+
+known variables:
+
+1)players position: grid coordinates and unit coordinates
+unit coordinates /64 -> greatest int function -> gives the grid coordinate
+2)players height = 32 pixels
+3)players FOV  = 60 deg
