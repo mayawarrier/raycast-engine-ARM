@@ -5,6 +5,9 @@
 #include "Map_Data.h"
 //#include "interrupts/key_interrupt_setup.h"
 
+// filled in by main
+volatile int MAP_DATA[MAP_SIZE_X][MAP_SIZE_Y];
+
 // set the default values, modified by key interrupts
 volatile double player_angle = 0;
 volatile int player_x_pos = 96;
@@ -47,7 +50,73 @@ int main(void)
 
 	// --------------------- initialize MAP_DATA -----------------------
 
-	config_map();
+	int i, j;
+	for (i = 0; i < MAP_SIZE_X; i++) {
+		for (j = 0; j < MAP_SIZE_Y; j++) {
+			MAP_DATA[i][j] = 0;
+		}
+	}
+
+	MAP_DATA[0][0] = 1;
+	MAP_DATA[1][0] = 1;
+	MAP_DATA[2][0] = 1;
+	MAP_DATA[3][0] = 1;
+	MAP_DATA[4][0] = 1;
+	MAP_DATA[5][0] = 1;
+	MAP_DATA[6][0] = 1;
+	MAP_DATA[7][0] = 1;
+	MAP_DATA[11][0] = 1;
+	MAP_DATA[14][0] = 1;
+
+	MAP_DATA[7][1] = 1;
+	MAP_DATA[11][1] = 1;
+	MAP_DATA[14][1] = 1;
+
+	MAP_DATA[0][2] = 1;
+	MAP_DATA[1][2] = 1;
+	MAP_DATA[2][2] = 1;
+	MAP_DATA[3][2] = 1;
+	MAP_DATA[4][2] = 1;
+	MAP_DATA[5][2] = 1;
+	MAP_DATA[7][2] = 1;
+	MAP_DATA[11][2] = 1;
+	MAP_DATA[14][2] = 1;
+
+	MAP_DATA[5][3] = 1;
+	MAP_DATA[7][3] = 1;
+	MAP_DATA[11][3] = 1;
+	MAP_DATA[14][3] = 1;
+
+	MAP_DATA[5][4] = 1;
+	MAP_DATA[7][4] = 1;
+	MAP_DATA[11][4] = 1;
+	MAP_DATA[14][4] = 1;
+
+	MAP_DATA[5][5] = 1;
+	MAP_DATA[7][5] = 1;
+	MAP_DATA[11][5] = 1;
+	MAP_DATA[14][5] = 1;
+
+	MAP_DATA[5][6] = 1;
+	MAP_DATA[7][6] = 1;
+	MAP_DATA[8][6] = 1;
+	MAP_DATA[11][6] = 1;
+	MAP_DATA[14][6] = 1;
+
+	MAP_DATA[0][9] = 1;
+	MAP_DATA[1][9] = 1;
+	MAP_DATA[2][9] = 1;
+	MAP_DATA[3][9] = 1;
+	MAP_DATA[4][9] = 1;
+	MAP_DATA[5][9] = 1;
+	MAP_DATA[6][9] = 1;
+	MAP_DATA[7][9] = 1;
+	MAP_DATA[8][9] = 1;
+	MAP_DATA[9][9] = 1;
+	MAP_DATA[10][9] = 1;
+	MAP_DATA[11][9] = 1;
+	MAP_DATA[12][9] = 1;
+	MAP_DATA[13][9] = 1;
 
 	// config key interrupts
 	//config_key_interrupts();
@@ -283,7 +352,7 @@ void draw_frame()
 	for (i = 0; i < SCREEN_SIZE_X; i++) {
 		this_slice = cast_ray(PLAYER_X, PLAYER_Y, PLAYER_ANGLE, i);
 		if (this_slice->size != INT_MAX)
-			draw_line(i, this_slice->location, i, this_slice->location + this_slice->size - 1, 0x001F);
+			draw_line(i, this_slice->location, i, this_slice->location + this_slice->size - 1, 0x003F);
 		free(this_slice);
 	}
 }

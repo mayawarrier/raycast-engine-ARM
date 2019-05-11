@@ -2,9 +2,6 @@
 #include "raycast.h"
 #include "../Map_Data.h"
 
-// filled in by main
-volatile int MAP_DATA[MAP_SIZE_X][MAP_SIZE_Y];
-
 #define PROJECTION_FACTOR 5500
 #define HALF_FOV FOV / 2.0
 
@@ -90,7 +87,7 @@ point find_closest_horizontal_wall_intersection(int playerX, int playerY) {
 	if (tan_alpha == 0) {
 		// abort, there is no horizontal intersection!
 		return make_point(INT_MAX, INT_MAX);
-	} else if (ALPHA == 90 || ALPHA == 270) {
+	} else if (abs(ALPHA - 90) < 0.7 || abs(ALPHA - 270) < 0.7) {
 		first_inter_x = playerX;
 		inter_offset_x = 0;
 	} else {
